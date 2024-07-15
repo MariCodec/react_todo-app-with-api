@@ -3,6 +3,8 @@
 import React from 'react';
 import { Todo } from '../types/Todo';
 import { TodoItem } from './TodoItem';
+import { TempTodo } from './TempTodo';
+import { ErrorMessage } from '../types/Error';
 
 type Props = {
   todos: Todo[];
@@ -10,8 +12,8 @@ type Props = {
   loadingTodoIds: number[];
   setLoadingTodoIds: React.Dispatch<React.SetStateAction<number[]>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
-  loading: boolean;
+  setErrorMessage: (message: ErrorMessage) => void;
+
   handleCompletedTodo: (todo: Todo) => void;
   deleteTodo: (id: number) => void;
   updateTodoTitle: (id: number, newTitle: string) => void;
@@ -20,7 +22,7 @@ type Props = {
 export const List: React.FC<Props> = ({
   todos,
   tempTodo,
-  loading,
+
   loadingTodoIds,
   handleCompletedTodo,
   setLoadingTodoIds,
@@ -35,7 +37,6 @@ export const List: React.FC<Props> = ({
         <TodoItem
           key={todo.id}
           todo={todo}
-          loading={loading}
           loadingId={loadingTodoIds.includes(todo.id)}
           handleCompletedTodo={handleCompletedTodo}
           setLoadingTodoIds={setLoadingTodoIds}
@@ -46,41 +47,12 @@ export const List: React.FC<Props> = ({
         />
       ))}
       {tempTodo && (
-        <div
-          key={tempTodo.id}
-          data-cy="Todo"
-          className={`todo ${tempTodo.completed ? 'completed' : ''}`}
-        >
-          <label className="todo__status-label">
-            <input
-              data-cy="TodoStatus"
-              type="checkbox"
-              className="todo__status"
-              checked={tempTodo.completed}
-              onChange={() => handleCompletedTodo(tempTodo)}
-            />
-          </label>
-          <div
-            data-cy="TodoLoader"
-            className={`modal overlay is-active ${loadingTodoIds.includes(tempTodo.id) && 'is-active'}`}
-          >
-            <div className="modal-background has-background-white-ter" />
-            <div className="loader" />
-          </div>
-
-          <span data-cy="TodoTitle" className="todo__title">
-            {tempTodo.title}
-          </span>
-
-          <button
-            type="button"
-            className="todo__remove"
-            data-cy="TodoDelete"
-            onClick={() => deleteTodo(tempTodo.id)}
-          >
-            ×
-          </button>
-        </div>
+        <TempTodo
+          tempTodo={tempTodo}
+          loadingTodoIds={loadingTodoIds}
+          deleteTodo={deleteTodo}
+          handleCompletedTodo={handleCompletedTodo}
+        />
       )}
     </section>
   );

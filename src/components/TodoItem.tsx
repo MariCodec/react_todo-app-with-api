@@ -4,16 +4,17 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { Todo } from '../types/Todo';
 import React from 'react';
-import { upDataTodo } from '../api/todos';
+import { upDateTodo } from '../api/todos';
+import { ErrorMessage } from '../types/Error';
 
 type Props = {
   todo: Todo;
-  loading: boolean;
+
   loadingId: boolean;
   handleCompletedTodo: (todo: Todo) => void;
   setLoadingTodoIds: React.Dispatch<React.SetStateAction<number[]>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
+  setErrorMessage: (message: ErrorMessage) => void;
   deleteTodo: (id: number) => void;
   updateTodoTitle: (id: number, newTitle: string) => void;
 };
@@ -49,10 +50,10 @@ export const TodoItem: FC<Props> = ({
 
     const updatedTodo = {
       ...todoWillChange,
-      title: updateTitle.trimStart().trimEnd(),
+      title: updateTitle.trim(),
     };
 
-    if (updatedTodo.title === '') {
+    if (!updatedTodo.title) {
       deleteTodo(updatedTodo.id);
     } else if (updatedTodo.title === todoWillChange.title) {
       setShowUpdateInput(false);
@@ -61,7 +62,7 @@ export const TodoItem: FC<Props> = ({
     } else {
       setLoadingTodoIds(prevId => [...prevId, todo.id]);
       setLoading(true);
-      upDataTodo(todo.id, updatedTodo)
+      upDateTodo(todo.id, updatedTodo)
         .then(() => {
           updateTodoTitle(updatedTodo.id, updatedTodo.title);
           setLoadingTodoIds(prevId => prevId.filter(prev => prev !== todo.id));

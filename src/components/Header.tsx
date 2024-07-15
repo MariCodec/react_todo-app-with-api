@@ -20,7 +20,6 @@ export const Header: React.FC<Props> = ({
   todos,
   allCompleted,
   handleToggleAll,
-  loading,
 }) => {
   const focusRef = useRef<HTMLInputElement | null>(null);
 
@@ -32,7 +31,7 @@ export const Header: React.FC<Props> = ({
 
   return (
     <header className="todoapp__header">
-      {!loading && todos.length > 0 && (
+      {!!todos.length && (
         <button
           type="button"
           className={`todoapp__toggle-all ${allCompleted ? 'active' : ''}`}

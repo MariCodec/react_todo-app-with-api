@@ -1,6 +1,5 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable jsx-a11y/control-has-associated-label */
-/* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useEffect, useState } from 'react';
 import { UserWarning } from './UserWarning';
 import * as todoService from './api/todos';
@@ -10,18 +9,24 @@ import { List } from './components/Todolist';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { Error } from './components/Error';
+import { filterTodos } from './utils/filterTodos';
+import { ErrorMessage } from './types/Error';
 
 export const App: React.FC = () => {
   const [title, setTitle] = useState('');
   const [todos, setTodos] = useState<Todo[]>([]);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState<ErrorMessage | ''>('');
   const [loading, setLoading] = useState(false);
 
-  const [filter, setFilter] = useState(FilterType.all);
+  const [filter, setFilter] = useState(FilterType.All);
   const [disable, setDisable] = useState(false);
   const [loadingTodoIds, setLoadingTodoIds] = useState<number[]>([]);
-  const allCompleted = todos.every(todo => todo.completed);
+  const [allCompleted, setAllCompleted] = useState(false);
+
+  useEffect(() => {
+    setAllCompleted(todos.every(todo => todo.completed));
+  }, [todos]);
 
   useEffect(() => {
     setLoading(true);
@@ -41,21 +46,12 @@ export const App: React.FC = () => {
     return <UserWarning />;
   }
 
-  const filterTodos = todos.filter(todo => {
-    switch (filter) {
-      case FilterType.active:
-        return !todo.completed;
-      case FilterType.completed:
-        return todo.completed;
-      default:
-        return true;
-    }
-  });
+  const filteredTodos = filterTodos(todos, filter);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (title.trim() === '') {
+    if (!title.trim()) {
       setErrorMessage('Title should not be empty');
 
       return;
@@ -65,7 +61,7 @@ export const App: React.FC = () => {
     let requestSuccessful = false;
     const temptodo: Todo = {
       userId: todoService.USER_ID,
-      title: title.trimStart().trimEnd(),
+      title: title.trim(),
       completed: false,
       id: 0,
     };
@@ -93,14 +89,14 @@ export const App: React.FC = () => {
       });
   };
 
-  const handleComplitedToDo = (upTodo: Todo) => {
+  const handleComplitedToDo = (updatedTodo: Todo) => {
     // eslint-disable-next-line @typescript-eslint/no-shadow
-    const { id, title, completed } = upTodo;
+    const { id, title, completed } = updatedTodo;
 
     setLoadingTodoIds(prev => [...prev, id]);
 
     todoService
-      .upDataTodo(id, { title, completed: !completed })
+      .upDateTodo(id, { title, completed: !completed })
       .then(() => {
         setTodos(
           todos.map(todo =>
@@ -168,7 +164,7 @@ export const App: React.FC = () => {
         setLoadingTodoIds(prev => [...prev, todo.id]);
 
         return todoService
-          .upDataTodo(todo.id, { completed: shouldCompleteAll })
+          .upDateTodo(todo.id, { completed: shouldCompleteAll })
           .then(() => {
             setTodos(currentTodos =>
               currentTodos.map(t =>
@@ -177,11 +173,11 @@ export const App: React.FC = () => {
             );
           })
           .catch(() => {
-            setErrorMessage('Unable to update todos');
+            setErrorMessage('Unable to update a todo');
           })
           .finally(() => {
             setLoadingTodoIds(prev =>
-              prev.filter(loadId => loadId !== todo.id),
+              prev.filter(todoId => todoId !== todo.id),
             );
           });
       }),
@@ -211,10 +207,9 @@ export const App: React.FC = () => {
           loading={loading}
         />
         <List
-          todos={filterTodos}
+          todos={filteredTodos}
           tempTodo={tempTodo}
           loadingTodoIds={loadingTodoIds}
-          loading={loading}
           handleCompletedTodo={handleComplitedToDo}
           deleteTodo={deleteTodo}
           setLoadingTodoIds={setLoadingTodoIds}
