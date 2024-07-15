@@ -129,7 +129,7 @@ export const TodoItem: FC<Props> = ({
           }}
           onBlur={() => setShowUpdateInput(false)}
         >
-          <form onSubmit={e => handleNewTitle(e, todo)}>
+          <form onSubmit={event => handleNewTitle(event, todo)}>
             <input
               data-cy="TodoTitleField"
               type="text"
