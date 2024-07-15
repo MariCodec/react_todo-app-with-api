@@ -5,23 +5,23 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { Todo } from '../types/Todo';
 import React from 'react';
 import { upDateTodo } from '../api/todos';
-import { ErrorMessage } from '../types/Error';
+import { ErrorMessages } from '../types/ErrorMessages';
 
 type Props = {
   todo: Todo;
+  loadingIds: number[];
 
-  loadingId: boolean;
   handleCompletedTodo: (todo: Todo) => void;
   setLoadingTodoIds: React.Dispatch<React.SetStateAction<number[]>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setErrorMessage: (message: ErrorMessage) => void;
+  setErrorMessage: (message: ErrorMessages) => void;
   deleteTodo: (id: number) => void;
   updateTodoTitle: (id: number, newTitle: string) => void;
 };
 export const TodoItem: FC<Props> = ({
   todo,
 
-  loadingId,
+  loadingIds,
   handleCompletedTodo,
   setLoadingTodoIds,
   deleteTodo,
@@ -43,7 +43,6 @@ export const TodoItem: FC<Props> = ({
 
   const handleNewTitle = (
     e: React.FormEvent<HTMLFormElement> | React.FocusEvent<HTMLInputElement>,
-
     todoWillChange: Todo,
   ) => {
     e.preventDefault();
@@ -69,7 +68,7 @@ export const TodoItem: FC<Props> = ({
           setShowUpdateInput(false);
         })
         .catch(() => {
-          setErrorMessage('Unable to update a todo');
+          setErrorMessage(ErrorMessages.UnableUpdateTodo);
           setLoadingTodoIds(prevId => prevId.filter(prev => prev !== todo.id));
           setShowUpdateInput(true);
         })
@@ -97,7 +96,7 @@ export const TodoItem: FC<Props> = ({
 
       <div
         data-cy="TodoLoader"
-        className={`modal overlay ${loadingId && 'is-active'} `}
+        className={`modal overlay ${loadingIds.includes(todo.id) && 'is-active'} `}
       >
         <div className="modal-background has-background-white-ter" />
         <div className="loader" />

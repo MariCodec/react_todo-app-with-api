@@ -4,7 +4,8 @@ import React from 'react';
 import { Todo } from '../types/Todo';
 import { TodoItem } from './TodoItem';
 import { TempTodo } from './TempTodo';
-import { ErrorMessage } from '../types/Error';
+
+import { ErrorMessages } from '../types/ErrorMessages';
 
 type Props = {
   todos: Todo[];
@@ -12,7 +13,7 @@ type Props = {
   loadingTodoIds: number[];
   setLoadingTodoIds: React.Dispatch<React.SetStateAction<number[]>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setErrorMessage: (message: ErrorMessage) => void;
+  setErrorMessage: (message: ErrorMessages) => void;
 
   handleCompletedTodo: (todo: Todo) => void;
   deleteTodo: (id: number) => void;
@@ -37,7 +38,7 @@ export const List: React.FC<Props> = ({
         <TodoItem
           key={todo.id}
           todo={todo}
-          loadingId={loadingTodoIds.includes(todo.id)}
+          loadingIds={loadingTodoIds}
           handleCompletedTodo={handleCompletedTodo}
           setLoadingTodoIds={setLoadingTodoIds}
           deleteTodo={deleteTodo}
